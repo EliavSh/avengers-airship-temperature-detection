@@ -4,7 +4,11 @@ from .models import *
 
 
 class ModelEnum(Enum):
-    SimpleModel = SimpleModel
+    """
+    An Enum that is responsible of model selection.
+    """
+    DoubleConv = DoubleConv
+    TripleConv = TripleConv
 
     def get(self, *args):
         return self.value(*args)

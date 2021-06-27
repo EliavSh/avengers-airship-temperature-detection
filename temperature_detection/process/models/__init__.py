@@ -1,1 +1,2 @@
-from temperature_detection.process.models.simple_model import SimpleModel
+from temperature_detection.process.models.double_conv import DoubleConv
+from temperature_detection.process.models.triple_conv import TripleConv

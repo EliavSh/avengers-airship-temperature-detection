@@ -2,8 +2,10 @@ from sklearn.model_selection import train_test_split
 
 from temperature_detection import *
 
+# Welcome to the main script! Here we are going to train, evaluate and save the model in five simple steps.
+
 # load images ======================================================================================================================= 1
-x, y, text_labels = LoaderEnum.ImageLoader().load('./outputs', is_shuffle=True)
+x, y, text_labels = LoaderEnum.DirectoryLoader().load('./outputs', is_shuffle=True)
 
 # split to train and test =========================================================================================================== 2
 # expand dim for our models (we are going to deal with conv layers that expects 4-dim input)
@@ -12,7 +14,7 @@ x = np.expand_dims(x, -1)
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 
 # build model ======================================================================================================================= 3
-model = ModelEnum.SimpleModel.get()
+model = ModelEnum.DoubleConv.get()
 
 model.compile(loss=keras.losses.SparseCategoricalCrossentropy(), optimizer='adam', metrics=["accuracy"])
 
