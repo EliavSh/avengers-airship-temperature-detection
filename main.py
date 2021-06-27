@@ -2,7 +2,7 @@ from sklearn.model_selection import train_test_split
 
 from temperature_detection import *
 
-# Welcome to the main script! Here we are going to train, evaluate and save the model in five simple steps.
+# Welcome to the main script! Here we are going to train, evaluate and save the model in six simple steps.
 
 # load images ======================================================================================================================= 1
 x, y, text_labels = LoaderEnum.DirectoryLoader().load('./outputs', is_shuffle=True)
@@ -21,10 +21,10 @@ model.compile(loss=keras.losses.SparseCategoricalCrossentropy(), optimizer='adam
 # create callbacks ================================================================================================================== 4
 tb_callback, cm_callback = Utils.create_callbacks(model, x_test, y_test, text_labels, PreProcessConf.log_dir)
 
-# fit the model ====================================================================================
+# fit the model ===================================================================================================================== 5
 history = model.fit(x_train, y_train, batch_size=10, epochs=15, validation_split=0.2, callbacks=[tb_callback, cm_callback])
 
-# save training graph and model ===================================================================================================== 5
+# save training graph and model ===================================================================================================== 6
 Utils.plot_training_graph(history, 0).savefig(PreProcessConf.log_dir + '/training_graph.png')
 
 model.save(PreProcessConf.log_dir + '/model/')

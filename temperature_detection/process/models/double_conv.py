@@ -15,7 +15,7 @@ class DoubleConv(tf.keras.Model):
     """
 
     def get_config(self):
-        return {'num_filters': 64}
+        return {'num_filters': 32}
 
     def __init__(self):
         super(DoubleConv, self).__init__()
