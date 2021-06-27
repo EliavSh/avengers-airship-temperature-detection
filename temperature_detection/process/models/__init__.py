@@ -1,0 +1,1 @@
+from temperature_detection.process.models.simple_model import SimpleModel
