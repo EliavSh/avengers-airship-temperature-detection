@@ -4,6 +4,8 @@ from datetime import datetime
 class PreProcessConf:
     log_dir = './logs/' + datetime.now().strftime("%Y%m%d-%H%M%S")
 
+    AUGMENT_DIR = './augmented/'
+
     NUM_LABELS = 3
 
     IMG_HEIGHT = 200
