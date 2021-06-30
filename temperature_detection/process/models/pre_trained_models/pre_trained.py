@@ -26,6 +26,7 @@ class PreTrained(tf.keras.Model):
 
         self.global_average_pooling = tf.keras.layers.GlobalAveragePooling2D()
 
+        # TODO - should we use single or double dense here? search the articles of 'PreTrainedEnum' for last layers architecture
         self.dense_1 = tf.keras.layers.Dense(64, activation='relu')
         self.dense_2 = tf.keras.layers.Dense(PreProcessConf.NUM_LABELS, activation='softmax')
 
