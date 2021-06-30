@@ -9,6 +9,7 @@ class ModelEnum(Enum):
     """
     DoubleConv = DoubleConv
     TripleConv = TripleConv
+    PreTrained = PreTrained
 
     def get(self, *args):
         return self.value(*args)

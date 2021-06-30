@@ -32,7 +32,7 @@ class TripleConv(tf.keras.Model):
         self.dense = tf.keras.layers.Dense(NUM_LABELS, activation='softmax')
 
         # build and summary
-        self.build(input_shape=(None, IMG_WIDTH, IMG_HEIGHT, 1))
+        self.build(input_shape=(None, IMG_WIDTH, IMG_HEIGHT, 3))
         self.summary()
 
     def call(self, inputs, **kwargs):
