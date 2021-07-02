@@ -1,7 +1,8 @@
 import os
-import numpy as np
-import cv2
 from typing import List
+
+import cv2
+import numpy as np
 from sklearn.utils import shuffle
 
 from temperature_detection.pre_process.load_data.abstract_loader import AbstractLoader
@@ -35,7 +36,10 @@ class DirectoryLoader(AbstractLoader):
         if is_shuffle:
             img_data_array, target_value, class_name = shuffle(img_data_array, target_value, class_name)
 
-        return np.array(img_data_array), np.array(target_value), np.array(class_name)
+        # finally, expand dims of image to contain 3-channels - as all our models expect
+        x = np.repeat(np.array(img_data_array)[..., np.newaxis], 3, -1)
+
+        return x, np.array(target_value), np.array(class_name)
 
     @staticmethod
     def to_target_value(class_arr: List[str]):

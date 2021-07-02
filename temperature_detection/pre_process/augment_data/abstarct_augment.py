@@ -34,7 +34,7 @@ class AbstractAugment(ABC):
 
                 # finally, save the original image too
                 imsave(os.path.join(PreProcessConf.AUGMENT_DIR, dir1, file), np.squeeze(image, -1))
-            print('Finished augmenting images for class:', dir1 + ',', 'Total of', str(len(all_image_files) * (num_of_samples + len(augmented_images))) + '.')
+            print('Finished augmenting images for class:', dir1 + ',', 'Total of', str(len(all_image_files) * (1 + num_of_samples * len(augmented_images))) + '.')
 
     @abstractmethod
     def internal_augment(self, img) -> List[np.array]:

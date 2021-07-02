@@ -19,6 +19,7 @@ class DoubleConv(tf.keras.Model):
 
     def __init__(self):
         super(DoubleConv, self).__init__()
+        self._name = 'DoubleConv'
 
         # build model
         self.conv1 = tf.keras.layers.Conv2D(filters=self.get_config()['num_filters'], kernel_size=3, activation='relu')

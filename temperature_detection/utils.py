@@ -1,26 +1,29 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import tensorflow as tf
-import sklearn.metrics
 import io
 import itertools
+
+import matplotlib.pyplot as plt
+import numpy as np
+import sklearn.metrics
+import tensorflow as tf
 from tensorflow import keras
-from datetime import datetime
 
 
 class Utils:
-    test_images = None
-    test_labels = None
+    # those are initiated in 'create_callbacks'
+    x_test = None
+    y_test = None
     class_names = None
     model = None
+    x_validation = None
+    y_validation = None
 
     @staticmethod
-    def plot_training_graph(train_data, start_epoch):
+    def plot_training_graph(all_train_data, start_epoch):
         # Plot the training and validation data
-        tacc = train_data.history['accuracy']
-        tloss = train_data.history['loss']
-        vacc = train_data.history['val_accuracy']
-        vloss = train_data.history['val_loss']
+        tacc = np.array([train_data.history['accuracy'] for train_data in all_train_data]).mean()
+        tloss = np.array([train_data.history['loss'] for train_data in all_train_data]).mean()
+        vacc = np.array([train_data.history['val_accuracy'] for train_data in all_train_data]).mean()
+        vloss = np.array([train_data.history['val_loss'] for train_data in all_train_data]).mean()
         Epoch_count = len(tacc) + start_epoch
         Epochs = []
         for i in range(start_epoch, Epoch_count):
@@ -55,11 +58,11 @@ class Utils:
     @staticmethod
     def log_confusion_matrix(epoch, logs):
         # Use the model to predict the values from the validation dataset.
-        test_pred_raw = Utils.model.predict(Utils.test_images)
+        test_pred_raw = Utils.model.predict(Utils.x_test)
         test_pred = np.argmax(test_pred_raw, axis=1)
 
         # Calculate the confusion matrix.
-        cm = sklearn.metrics.confusion_matrix(Utils.test_labels, test_pred)
+        cm = sklearn.metrics.confusion_matrix(Utils.y_test, test_pred)
         # Log the confusion matrix as an image summary.
         figure = Utils.plot_confusion_matrix(cm, class_names=np.unique(Utils.class_names))
         cm_image = Utils.plot_to_image(figure)
@@ -116,15 +119,29 @@ class Utils:
         return image
 
     @staticmethod
-    def create_callbacks(model, x_test, y_test, text_labels, log_dir):
-        tb_callback = tf.keras.callbacks.TensorBoard(log_dir, update_freq=1)
+    def accuracy_callback(epoch, logs):
+        validation_loss, validation_accuracy = Utils.model.evaluate(Utils.x_validation, Utils.y_validation, verbose=0)
 
-        Utils.test_images = x_test
-        Utils.test_labels = y_test
+        tf.summary.scalar('validation_losses', validation_loss, step=epoch)
+        tf.summary.scalar('validation_accuracies', validation_accuracy, step=epoch)
+
+    @staticmethod
+    def create_callbacks(model, x_validation, y_validation, x_test, y_test, text_labels, log_dir):
+        # set static attributes
+        Utils.x_validation = x_validation
+        Utils.y_validation = y_validation
+        Utils.x_test = x_test
+        Utils.y_test = y_test
         Utils.class_names = np.unique(text_labels)
         Utils.model = model
 
-        # Define the per-epoch callback.
+        # Define the per-epoch tensorboard standard callback.
+        tb_callback = tf.keras.callbacks.TensorBoard(log_dir, update_freq=1)
+
+        # Define the per-epoch confusion matrix callback.
         cm_callback = keras.callbacks.LambdaCallback(on_epoch_end=Utils.log_confusion_matrix)
 
-        return tb_callback, cm_callback
+        # Define the per-epoch validation accuracy callback.
+        acc_callback = keras.callbacks.LambdaCallback(on_epoch_end=Utils.accuracy_callback)
+
+        return tb_callback, cm_callback, acc_callback

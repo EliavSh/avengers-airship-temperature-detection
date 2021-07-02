@@ -19,6 +19,7 @@ class TripleConv(tf.keras.Model):
 
     def __init__(self):
         super(TripleConv, self).__init__()
+        self._name = "TripleConv"
 
         # build model
         self.conv1 = tf.keras.layers.Conv2D(filters=self.get_config()['num_filters'], kernel_size=3, activation='relu')
