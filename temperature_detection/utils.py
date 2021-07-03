@@ -1,34 +1,26 @@
 import io
-import itertools
-import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-import sklearn.metrics
 import tensorflow as tf
-from tensorflow import keras
-
-from temperature_detection.pre_process.pre_process_conf import PreProcessConf
 
 
 class Utils:
-    # those are initiated in 'create_callbacks'
-    x_test = None
-    y_test = None
-    class_names = None
-    model = None
-    x_validation = None
-    y_validation = None
-
-    validation_histories = {"validation_loss": [], "validation_accuracy": []}
+    @staticmethod
+    def image_summary(image, name, num_images, step):
+        # change the dimension of an image and summary
+        image_format = tf.transpose(image, [3, 1, 2, 0])  # (batch, 200-k*x, 200-k*x, None)
+        image_format = image_format[0:num_images, :, :, 0]  # (1, 200-k*x, 200-k*x)
+        image_format = tf.expand_dims(image_format, -1)  # (1, 200-k*x, 200-k*x, 1)
+        tf.summary.image(name=name, data=image_format, max_outputs=num_images, step=step)
 
     @staticmethod
-    def plot_training_graph(train_loss, train_accuracy, start_epoch):
+    def plot_training_graph(train_loss, train_accuracy, validation_loss, validation_accuracy, start_epoch, writer):
         # Plot the training and validation data
-        tacc = np.array(train_accuracy).mean(axis=0)
         tloss = np.array(train_loss).mean(axis=0)
-        vacc = np.array(Utils.validation_histories['validation_accuracy']).mean(axis=0)
-        vloss = np.array(Utils.validation_histories['validation_loss']).mean(axis=0)
+        tacc = np.array(train_accuracy).mean(axis=0)
+        vloss = np.array(validation_loss).mean(axis=0)
+        vacc = np.array(validation_accuracy).mean(axis=0)
         Epoch_count = len(tacc) + start_epoch
         Epochs = []
         for i in range(start_epoch, Epoch_count):
@@ -57,55 +49,9 @@ class Utils:
         axes[1].legend()
         plt.tight_layout()
         # plt.style.use('fivethirtyeight')
-        with tf.summary.create_file_writer(os.path.join(PreProcessConf.log_dir, 'train')).as_default():
+        with writer.as_default():
             tf.summary.image("1. Final Results/Training progress", Utils.plot_to_image(fig), step=0)
         return fig
-
-    @staticmethod
-    def log_confusion_matrix(epoch, logs):
-        # Use the model to predict the values from the validation dataset.
-        test_pred_raw = Utils.model.predict(Utils.x_test)
-        test_pred = np.argmax(test_pred_raw, axis=1)
-
-        # Calculate the confusion matrix.
-        cm = sklearn.metrics.confusion_matrix(Utils.y_test, test_pred)
-        # Log the confusion matrix as an image summary.
-        figure = Utils.plot_confusion_matrix(cm, class_names=np.unique(Utils.class_names))
-        cm_image = Utils.plot_to_image(figure)
-
-        # Log the confusion matrix as an image summary.
-        tf.summary.image("1. Final Results/Confusion Matrix", cm_image, step=epoch)
-
-    @staticmethod
-    def plot_confusion_matrix(cm, class_names):
-        """
-        Returns a matplotlib figure containing the plotted confusion matrix.
-
-        Args:
-          cm (array, shape = [n, n]): a confusion matrix of integer classes
-          class_names (array, shape = [n]): String names of the integer classes
-        """
-        figure = plt.figure(figsize=(8, 8))
-        plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-        plt.title("Confusion matrix")
-        plt.colorbar()
-        tick_marks = np.arange(len(class_names))
-        plt.xticks(tick_marks, class_names, rotation=45)
-        plt.yticks(tick_marks, class_names)
-
-        # Compute the labels from the normalized confusion matrix.
-        labels = np.around(cm.astype('float') / cm.sum(axis=1)[:, np.newaxis], decimals=2)
-
-        # Use white text if squares are dark; otherwise black.
-        threshold = cm.max() / 2.
-        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-            color = "white" if cm[i, j] > threshold else "black"
-            plt.text(j, i, labels[i, j], horizontalalignment="center", color=color)
-
-        plt.tight_layout()
-        plt.ylabel('True label')
-        plt.xlabel('Predicted label')
-        return figure
 
     @staticmethod
     def plot_to_image(figure):
@@ -123,41 +69,3 @@ class Utils:
         # Add the batch dimension
         image = tf.expand_dims(image, 0)
         return image
-
-    @staticmethod
-    def accuracy_callback(epoch, logs):
-        validation_loss, validation_accuracy = Utils.model.evaluate(Utils.x_validation, Utils.y_validation, verbose=0)
-
-        if epoch == 0:
-            # first epoch of training, add new list with the scores
-            Utils.validation_histories['validation_loss'].append([validation_loss])
-            Utils.validation_histories['validation_accuracy'].append([validation_accuracy])
-        else:
-            # not first epoch, find the last list (current training) and append the scores
-            Utils.validation_histories['validation_loss'][-1].append(validation_loss)
-            Utils.validation_histories['validation_accuracy'][-1].append(validation_accuracy)
-
-        # summary scores for tensorboard
-        tf.summary.scalar('validation_loss', validation_loss, step=epoch)
-        tf.summary.scalar('validation_accuracy', validation_accuracy, step=epoch)
-
-    @staticmethod
-    def create_callbacks(model, x_validation, y_validation, x_test, y_test, text_labels, log_dir):
-        # set static attributes
-        Utils.x_validation = x_validation
-        Utils.y_validation = y_validation
-        Utils.x_test = x_test
-        Utils.y_test = y_test
-        Utils.class_names = np.unique(text_labels)
-        Utils.model = model
-
-        # Define the per-epoch tensorboard standard callback.
-        tb_callback = tf.keras.callbacks.TensorBoard(log_dir, update_freq=1, write_images=True)
-
-        # Define the per-epoch confusion matrix callback.
-        cm_callback = keras.callbacks.LambdaCallback(on_epoch_end=Utils.log_confusion_matrix)
-
-        # Define the per-epoch validation accuracy callback.
-        acc_callback = keras.callbacks.LambdaCallback(on_epoch_end=Utils.accuracy_callback)
-
-        return tb_callback, cm_callback, acc_callback

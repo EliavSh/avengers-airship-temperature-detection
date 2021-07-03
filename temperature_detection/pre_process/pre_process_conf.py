@@ -16,4 +16,6 @@ class PreProcessConf:
     IMAGES_TO_SUMMARY = 3
     DISPLAY_IMAGES = True
 
-    N_SPLITS = 5
+    N_SPLITS = 2
+
+    SAVE_MODEL = True
