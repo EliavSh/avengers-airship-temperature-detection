@@ -13,9 +13,10 @@ class PreProcessConf:
     IMG_HEIGHT = 200
     IMG_WIDTH = 200
 
+    # images display is currently not working - see the 'TODO' in double_conv
     IMAGES_TO_SUMMARY = 3
     DISPLAY_IMAGES = True
 
-    N_SPLITS = 2
+    N_SPLITS = 5
 
     SAVE_MODEL = True

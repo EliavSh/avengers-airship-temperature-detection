@@ -47,7 +47,7 @@ class DoubleConv(tf.keras.Model):
 
         # displaying input image and convolutional filters images
         # TODO - this doesn't work. we can add a tensorboard callback for this to work but it's too trashy..
-        #  fix it with some other way, here and all other models too
+        #  fix it with some other way, here and in every other model too
         if DISPLAY_IMAGES:
             Utils.image_summary(inputs, 'input image', 1, self._train_counter)
             Utils.image_summary(conv1_out, 'after_conv_1', IMAGES_TO_SUMMARY, self._train_counter)
