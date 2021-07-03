@@ -1,11 +1,14 @@
 import io
 import itertools
+import os
 
 import matplotlib.pyplot as plt
 import numpy as np
 import sklearn.metrics
 import tensorflow as tf
 from tensorflow import keras
+
+from temperature_detection.pre_process.pre_process_conf import PreProcessConf
 
 
 class Utils:
@@ -17,13 +20,15 @@ class Utils:
     x_validation = None
     y_validation = None
 
+    validation_histories = {"validation_loss": [], "validation_accuracy": []}
+
     @staticmethod
-    def plot_training_graph(all_train_data, start_epoch):
+    def plot_training_graph(train_loss, train_accuracy, start_epoch):
         # Plot the training and validation data
-        tacc = np.array([train_data.history['accuracy'] for train_data in all_train_data]).mean()
-        tloss = np.array([train_data.history['loss'] for train_data in all_train_data]).mean()
-        vacc = np.array([train_data.history['val_accuracy'] for train_data in all_train_data]).mean()
-        vloss = np.array([train_data.history['val_loss'] for train_data in all_train_data]).mean()
+        tacc = np.array(train_accuracy).mean(axis=0)
+        tloss = np.array(train_loss).mean(axis=0)
+        vacc = np.array(Utils.validation_histories['validation_accuracy']).mean(axis=0)
+        vloss = np.array(Utils.validation_histories['validation_loss']).mean(axis=0)
         Epoch_count = len(tacc) + start_epoch
         Epochs = []
         for i in range(start_epoch, Epoch_count):
@@ -52,7 +57,8 @@ class Utils:
         axes[1].legend()
         plt.tight_layout()
         # plt.style.use('fivethirtyeight')
-        plt.show()
+        with tf.summary.create_file_writer(os.path.join(PreProcessConf.log_dir, 'train')).as_default():
+            tf.summary.image("1. Final Results/Training progress", Utils.plot_to_image(fig), step=0)
         return fig
 
     @staticmethod
@@ -68,7 +74,7 @@ class Utils:
         cm_image = Utils.plot_to_image(figure)
 
         # Log the confusion matrix as an image summary.
-        tf.summary.image("Confusion Matrix", cm_image, step=epoch)
+        tf.summary.image("1. Final Results/Confusion Matrix", cm_image, step=epoch)
 
     @staticmethod
     def plot_confusion_matrix(cm, class_names):
@@ -122,8 +128,18 @@ class Utils:
     def accuracy_callback(epoch, logs):
         validation_loss, validation_accuracy = Utils.model.evaluate(Utils.x_validation, Utils.y_validation, verbose=0)
 
-        tf.summary.scalar('validation_losses', validation_loss, step=epoch)
-        tf.summary.scalar('validation_accuracies', validation_accuracy, step=epoch)
+        if epoch == 0:
+            # first epoch of training, add new list with the scores
+            Utils.validation_histories['validation_loss'].append([validation_loss])
+            Utils.validation_histories['validation_accuracy'].append([validation_accuracy])
+        else:
+            # not first epoch, find the last list (current training) and append the scores
+            Utils.validation_histories['validation_loss'][-1].append(validation_loss)
+            Utils.validation_histories['validation_accuracy'][-1].append(validation_accuracy)
+
+        # summary scores for tensorboard
+        tf.summary.scalar('validation_loss', validation_loss, step=epoch)
+        tf.summary.scalar('validation_accuracy', validation_accuracy, step=epoch)
 
     @staticmethod
     def create_callbacks(model, x_validation, y_validation, x_test, y_test, text_labels, log_dir):
@@ -136,7 +152,7 @@ class Utils:
         Utils.model = model
 
         # Define the per-epoch tensorboard standard callback.
-        tb_callback = tf.keras.callbacks.TensorBoard(log_dir, update_freq=1)
+        tb_callback = tf.keras.callbacks.TensorBoard(log_dir, update_freq=1, write_images=True)
 
         # Define the per-epoch confusion matrix callback.
         cm_callback = keras.callbacks.LambdaCallback(on_epoch_end=Utils.log_confusion_matrix)

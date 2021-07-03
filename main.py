@@ -16,12 +16,9 @@ x, y, text_labels = LoaderEnum.DirectoryLoader().load(PreProcessConf.SOURCE_IMAG
 # split to train and test =========================================================================================================== 2
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 
-# TODO - add this to some callback inside coach and use the plot_training_graph as tf.summary.image
-# histories = {"train_losses": [], "train_accuracies": [], "validation_losses": [], "validation_accuracies": []}
+coach = CrossValidationCoach(x_train, y_train, x_test, y_test, text_labels)
 
-coach = CrossValidationCoach(x_train, y_train, x_test, y_test, text_labels, batch_size=20, epochs=20)
-
-coach.train(ModelEnum.DoubleConv)
+coach.train(ModelEnum.DoubleConv, batch_size=20, epochs=20)
 
 # save training graph and model ===================================================================================================== 6
 # Utils.plot_training_graph(histories, 0).savefig(PreProcessConf.log_dir + '/training_graph.png')

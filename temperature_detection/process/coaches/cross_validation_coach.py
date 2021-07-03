@@ -13,7 +13,7 @@ This class should run over:
 
 
 class CrossValidationCoach:
-    def __init__(self, x_train, y_train, x_test, y_test, text_labels, batch_size, epochs):
+    def __init__(self, x_train, y_train, x_test, y_test, text_labels):
         self.x_train = x_train
         self.x_test = x_test
         self.y_train = y_train
@@ -21,14 +21,13 @@ class CrossValidationCoach:
 
         self.text_labels = text_labels
 
-        self.batch_size = batch_size
-        self.epochs = epochs
-
         self.k_fold = StratifiedKFold(n_splits=PreProcessConf.N_SPLITS, shuffle=True)
 
         self.model = None
 
-    def train(self, model_enum, *model_args):
+        self.train_histories = {"train_loss": [], "train_accuracy": []}
+
+    def train(self, model_enum, *model_args, batch_size, epochs):
         for train, validation in self.k_fold.split(self.x_train, self.y_train):
             # build model
             self.model = model_enum.get(*model_args)
@@ -41,6 +40,10 @@ class CrossValidationCoach:
                                                                             self.y_test, self.text_labels, PreProcessConf.log_dir)
 
             # fit the model ===================================================================================================================== 5
-            self.model.fit(self.x_train[train], self.y_train[train], batch_size=self.batch_size, epochs=self.epochs, callbacks=[tb_callback, cm_callback, acc_callback])
+            history = self.model.fit(self.x_train[train], self.y_train[train], batch_size=batch_size, epochs=epochs, callbacks=[tb_callback, cm_callback, acc_callback])
 
-        # finally, summary the mean values
+            self.train_histories['train_loss'].append(history.history['loss'])
+            self.train_histories['train_accuracy'].append(history.history['accuracy'])
+
+        # finally, summary the mean values as image to tensorboard + save the figure locally
+        Utils.plot_training_graph(self.train_histories['train_loss'], self.train_histories['train_accuracy'], 0).savefig(PreProcessConf.log_dir + '/training_graph.png')

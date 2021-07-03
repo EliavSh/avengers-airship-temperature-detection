@@ -13,7 +13,7 @@ class PreProcessConf:
     IMG_HEIGHT = 200
     IMG_WIDTH = 200
 
-    IMAGES_TO_SUMMARY = 7
+    IMAGES_TO_SUMMARY = 3
     DISPLAY_IMAGES = True
 
-    N_SPLITS = 4
+    N_SPLITS = 5
