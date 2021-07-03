@@ -16,7 +16,7 @@ class MetricsCallback(tf.keras.callbacks.Callback):
         self.validation_accuracy = []
 
     def on_epoch_end(self, epoch, logs=None):
-        validation_loss, validation_accuracy = self.model.evaluate(self.x_validation, self.y_validation, verbose=0)
+        validation_loss, validation_accuracy = self.model.evaluate(self.x_validation, self.y_validation, verbose=1)
 
         self.validation_loss.append(validation_loss)
         self.validation_accuracy.append(validation_accuracy)

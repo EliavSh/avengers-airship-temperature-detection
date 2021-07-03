@@ -10,13 +10,13 @@ from temperature_detection import *
 
 # load images
 # TODO - decide whether to load from 'augmented' or 'outputs' by the existence of 'augmented'
-x, y, text_labels = LoaderEnum.DirectoryLoader().load(PreProcessConf.SOURCE_IMAGE_DIR, is_shuffle=True)
+x, y, text_labels = LoaderEnum.DirectoryLoader().load(PreProcessConf.AUGMENT_DIR, is_shuffle=True)
 
 # split to train and test
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
 
 coach = CrossValidationCoach(x_train, y_train, x_test, y_test, text_labels)
 
-coach.train(ModelEnum.DoubleConv, batch_size=20, epochs=1)
+coach.train(ModelEnum.DoubleConv, batch_size=20, epochs=15)
 
 print('king')
