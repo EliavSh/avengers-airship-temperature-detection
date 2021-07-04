@@ -21,6 +21,7 @@ class PreTrained(tf.keras.Model):
 
     def __init__(self, pre_trained_model: PreTrainedEnum):
         super(PreTrained, self).__init__()
+        self._name = pre_trained_model.name
 
         # build model
         self.base_model = pre_trained_model.get(include_top=False)  # load pre-trained model without last dense layer/s

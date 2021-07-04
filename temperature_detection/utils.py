@@ -15,12 +15,12 @@ class Utils:
         tf.summary.image(name=name, data=image_format, max_outputs=num_images, step=step)
 
     @staticmethod
-    def plot_training_graph(train_loss, train_accuracy, validation_loss, validation_accuracy, start_epoch, writer):
+    def plot_training_graph(train_loss, train_accuracy, validation_loss, validation_accuracy, start_epoch, writer, tab_prefix):
         # Plot the training and validation data
-        tloss = np.array(train_loss).mean(axis=0)
-        tacc = np.array(train_accuracy).mean(axis=0)
-        vloss = np.array(validation_loss).mean(axis=0)
-        vacc = np.array(validation_accuracy).mean(axis=0)
+        tloss = train_loss
+        tacc = train_accuracy
+        vloss = validation_loss
+        vacc = validation_accuracy
         Epoch_count = len(tacc) + start_epoch
         Epochs = []
         for i in range(start_epoch, Epoch_count):
@@ -50,7 +50,7 @@ class Utils:
         plt.tight_layout()
         # plt.style.use('fivethirtyeight')
         with writer.as_default():
-            tf.summary.image("1. Final Results/Training progress", Utils.plot_to_image(fig), step=0)
+            tf.summary.image(tab_prefix + "/Training progress", Utils.plot_to_image(fig), step=0)
         return fig
 
     @staticmethod

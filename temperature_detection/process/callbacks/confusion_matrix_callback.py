@@ -9,7 +9,7 @@ from temperature_detection.utils import Utils
 
 
 class ConfusionMatrixCallback(tf.keras.callbacks.Callback):
-    def __init__(self, x_test, y_test, text_labels):
+    def __init__(self, x_test, y_test, text_labels, tab_prefix, writer):
         super().__init__()
 
         self.x_test = x_test
@@ -17,14 +17,15 @@ class ConfusionMatrixCallback(tf.keras.callbacks.Callback):
         self.class_names = np.unique(text_labels)
 
         self.model = None
-        self.writer = None
+        self.writer = writer
         self.plot_results = None
+
+        self.tab_prefix = tab_prefix
 
         self.confusion_matrices = {}
 
-    def build(self, model, writer, plot_results):
+    def build(self, model, plot_results):
         self.model = model
-        self.writer = writer
         # plot only in the last run - confusion matrix should be the average of all models
         self.plot_results = plot_results
 
@@ -49,7 +50,7 @@ class ConfusionMatrixCallback(tf.keras.callbacks.Callback):
 
             # Log the confusion matrix as an image summary.
             with self.writer.as_default():
-                tf.summary.image("1. Final Results/Confusion Matrix", cm_image, step=epoch)
+                tf.summary.image(self.tab_prefix + "/Confusion Matrix", cm_image, step=epoch)
 
     def plot_confusion_matrix(self, cm, class_names):
         """
@@ -60,6 +61,7 @@ class ConfusionMatrixCallback(tf.keras.callbacks.Callback):
           class_names (array, shape = [n]): String names of the integer classes
         """
         figure = plt.figure(figsize=(8, 8))
+        plt.style.use('default')
         plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
         plt.title("Confusion matrix")
         plt.colorbar()
