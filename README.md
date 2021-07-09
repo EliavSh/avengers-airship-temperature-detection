@@ -3,7 +3,7 @@
 This project deals with a classification problem of three classes. <br>
 In order to solve the problem we implemented an API for all keras pre-trained models.
 
-## Example - Pre-Trained MobileNet with Fine-Tune of a Single FC Layer
+## Example: Pre-Trained MobileNet with Fine-Tune of a Single FC Layer
 We use 4-fold Cross-Validation technique for evaluation, as shown below.
 
 * Classical MobileNet results:
