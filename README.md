@@ -6,7 +6,7 @@ In order to solve the problem we implemented an API for all keras pre-trained mo
 ## Example: Pre-Trained MobileNet with Fine-Tune of a Single FC Layer
 We use 4-fold Cross-Validation technique for evaluation, as shown below.
 
-* Classical MobileNet results:
+* Classic MobileNet results:
 ![image](https://user-images.githubusercontent.com/55198967/125076702-e8dfe380-e0c8-11eb-9bc8-eedf428d5b91.png)
 
 * MobileNet variants results:
