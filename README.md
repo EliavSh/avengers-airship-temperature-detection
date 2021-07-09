@@ -12,7 +12,7 @@ We use 4-fold Cross-Validation technique for evaluation, as shown below.
 * MobileNet variants results:
 ![image](https://user-images.githubusercontent.com/55198967/125076793-044aee80-e0c9-11eb-9fae-9a15ba03af5e.png)
 
-* For a complete view of all the models we use, the mean of all folds:
+* For a complete view of all the models we now present the mean of all folds:
 ![image](https://user-images.githubusercontent.com/55198967/125077071-59870000-e0c9-11eb-9a73-6e55729f3411.png)
 
 * Additionaly, we provide a summary graph of train and validation phases:
