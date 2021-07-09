@@ -1,7 +1,7 @@
 # avengers-airship-temperature-detection
 
-This project deals with classification problem of three classes.
-For solving the problem we are going to use the keras pre-trained models.
+This project deals with a classification problem of three classes.
+In order to solve the problem we implemented an API for all keras pre-trained models.
 
 ## Example - Pre-Trained MobileNet with Fine-Tune of a Single FC Layer
 We use 4-fold Cross-Validation technique for evaluation, as shown below. 
