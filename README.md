@@ -5,9 +5,10 @@ For solving the problem we are going to use the keras pre-trained models.
 
 ## Example - pre-trained MobileNet
 We use 4-fold Cross-Validation technique for evaluation, as shown below. 
+Classical MobileNet results:
 ![image](https://user-images.githubusercontent.com/55198967/125076702-e8dfe380-e0c8-11eb-9bc8-eedf428d5b91.png)
 
-And its variants:
+MobileNet variants results:
 ![image](https://user-images.githubusercontent.com/55198967/125076793-044aee80-e0c9-11eb-9fae-9a15ba03af5e.png)
 
 For a complete view of all the models we use, the mean of all folds:
