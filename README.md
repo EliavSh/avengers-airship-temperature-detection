@@ -3,9 +3,8 @@
 This project deals with classification problem of three objects.
 For solving the problem we are going to use the keras pre-trained models.
 
-We use 4-fold Cross-Validation technique for evaluation, as shown below. 
-
 ## Example - pre-trained MobileNet
+We use 4-fold Cross-Validation technique for evaluation, as shown below. 
 ![image](https://user-images.githubusercontent.com/55198967/125076702-e8dfe380-e0c8-11eb-9bc8-eedf428d5b91.png)
 
 And its variants:
