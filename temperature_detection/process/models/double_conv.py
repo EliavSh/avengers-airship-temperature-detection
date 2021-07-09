@@ -1,6 +1,7 @@
 import tensorflow as tf
 
 from temperature_detection.pre_process.pre_process_conf import PreProcessConf
+from temperature_detection.utils import Utils
 
 IMG_HEIGHT = PreProcessConf.IMG_HEIGHT
 IMG_WIDTH = PreProcessConf.IMG_WIDTH
@@ -19,6 +20,7 @@ class DoubleConv(tf.keras.Model):
 
     def __init__(self):
         super(DoubleConv, self).__init__()
+        self._name = 'DoubleConv'
 
         # build model
         self.conv1 = tf.keras.layers.Conv2D(filters=self.get_config()['num_filters'], kernel_size=3, activation='relu')
@@ -30,12 +32,10 @@ class DoubleConv(tf.keras.Model):
         self.dense = tf.keras.layers.Dense(NUM_LABELS, activation='softmax')
 
         # build and summary
-        self.build(input_shape=(None, IMG_WIDTH, IMG_HEIGHT, 1))
+        self.build(input_shape=(None, IMG_WIDTH, IMG_HEIGHT, 3))
         self.summary()
 
     def call(self, inputs, **kwargs):
-        # forward pass of the model
-
         conv1_out = self.conv1(inputs)  # out: (None, 194, 194, 128)
         max_pool1_out = self.max_pool1(conv1_out)
 
@@ -46,19 +46,14 @@ class DoubleConv(tf.keras.Model):
         outputs = self.dense(flatten_out)
 
         # displaying input image and convolutional filters images
+        # TODO - this doesn't work. we can add a tensorboard callback for this to work but it's too trashy..
+        #  fix it with some other way, here and in every other model too
         if DISPLAY_IMAGES:
-            self.image_summary(inputs, 'input image', 1)
-            self.image_summary(conv1_out, 'after_conv_1', IMAGES_TO_SUMMARY)
-            self.image_summary(conv2_out, 'after_conv_2', IMAGES_TO_SUMMARY)
+            Utils.image_summary(inputs, 'input image', 1, self._train_counter)
+            Utils.image_summary(conv1_out, 'after_conv_1', IMAGES_TO_SUMMARY, self._train_counter)
+            Utils.image_summary(conv2_out, 'after_conv_2', IMAGES_TO_SUMMARY, self._train_counter)
 
         # summary the chosen class for tensorboard visualization
-        tf.summary.histogram('outputs', tf.argmax(outputs, axis=1))
-        return outputs
+        tf.summary.histogram('outputs', tf.argmax(outputs, axis=1), self._train_counter)
 
-    @staticmethod
-    def image_summary(x, name, num_images):
-        # change dim of image and summary
-        image_format = tf.transpose(x, [3, 1, 2, 0])
-        image_format = image_format[0:num_images, :, :, 0]
-        image_format = tf.expand_dims(image_format, -1)
-        tf.summary.image(name=name, data=image_format, max_outputs=num_images)
+        return outputs

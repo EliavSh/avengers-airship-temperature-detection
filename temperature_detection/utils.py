@@ -1,26 +1,26 @@
+import io
+
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-import sklearn.metrics
-import io
-import itertools
-from tensorflow import keras
-from datetime import datetime
 
 
 class Utils:
-    test_images = None
-    test_labels = None
-    class_names = None
-    model = None
+    @staticmethod
+    def image_summary(image, name, num_images, step):
+        # change the dimension of an image and summary
+        image_format = tf.transpose(image, [3, 1, 2, 0])  # (batch, 200-k*x, 200-k*x, None)
+        image_format = image_format[0:num_images, :, :, 0]  # (1, 200-k*x, 200-k*x)
+        image_format = tf.expand_dims(image_format, -1)  # (1, 200-k*x, 200-k*x, 1)
+        tf.summary.image(name=name, data=image_format, max_outputs=num_images, step=step)
 
     @staticmethod
-    def plot_training_graph(train_data, start_epoch):
+    def plot_training_graph(train_loss, train_accuracy, validation_loss, validation_accuracy, start_epoch, writer, tab_prefix):
         # Plot the training and validation data
-        tacc = train_data.history['accuracy']
-        tloss = train_data.history['loss']
-        vacc = train_data.history['val_accuracy']
-        vloss = train_data.history['val_loss']
+        tloss = train_loss
+        tacc = train_accuracy
+        vloss = validation_loss
+        vacc = validation_accuracy
         Epoch_count = len(tacc) + start_epoch
         Epochs = []
         for i in range(start_epoch, Epoch_count):
@@ -49,54 +49,9 @@ class Utils:
         axes[1].legend()
         plt.tight_layout()
         # plt.style.use('fivethirtyeight')
-        plt.show()
+        with writer.as_default():
+            tf.summary.image(tab_prefix + "/Training progress", Utils.plot_to_image(fig), step=0)
         return fig
-
-    @staticmethod
-    def log_confusion_matrix(epoch, logs):
-        # Use the model to predict the values from the validation dataset.
-        test_pred_raw = Utils.model.predict(Utils.test_images)
-        test_pred = np.argmax(test_pred_raw, axis=1)
-
-        # Calculate the confusion matrix.
-        cm = sklearn.metrics.confusion_matrix(Utils.test_labels, test_pred)
-        # Log the confusion matrix as an image summary.
-        figure = Utils.plot_confusion_matrix(cm, class_names=np.unique(Utils.class_names))
-        cm_image = Utils.plot_to_image(figure)
-
-        # Log the confusion matrix as an image summary.
-        tf.summary.image("Confusion Matrix", cm_image, step=epoch)
-
-    @staticmethod
-    def plot_confusion_matrix(cm, class_names):
-        """
-        Returns a matplotlib figure containing the plotted confusion matrix.
-
-        Args:
-          cm (array, shape = [n, n]): a confusion matrix of integer classes
-          class_names (array, shape = [n]): String names of the integer classes
-        """
-        figure = plt.figure(figsize=(8, 8))
-        plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-        plt.title("Confusion matrix")
-        plt.colorbar()
-        tick_marks = np.arange(len(class_names))
-        plt.xticks(tick_marks, class_names, rotation=45)
-        plt.yticks(tick_marks, class_names)
-
-        # Compute the labels from the normalized confusion matrix.
-        labels = np.around(cm.astype('float') / cm.sum(axis=1)[:, np.newaxis], decimals=2)
-
-        # Use white text if squares are dark; otherwise black.
-        threshold = cm.max() / 2.
-        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-            color = "white" if cm[i, j] > threshold else "black"
-            plt.text(j, i, labels[i, j], horizontalalignment="center", color=color)
-
-        plt.tight_layout()
-        plt.ylabel('True label')
-        plt.xlabel('Predicted label')
-        return figure
 
     @staticmethod
     def plot_to_image(figure):
@@ -114,17 +69,3 @@ class Utils:
         # Add the batch dimension
         image = tf.expand_dims(image, 0)
         return image
-
-    @staticmethod
-    def create_callbacks(model, x_test, y_test, text_labels, log_dir):
-        tb_callback = tf.keras.callbacks.TensorBoard(log_dir, update_freq=1)
-
-        Utils.test_images = x_test
-        Utils.test_labels = y_test
-        Utils.class_names = np.unique(text_labels)
-        Utils.model = model
-
-        # Define the per-epoch callback.
-        cm_callback = keras.callbacks.LambdaCallback(on_epoch_end=Utils.log_confusion_matrix)
-
-        return tb_callback, cm_callback
