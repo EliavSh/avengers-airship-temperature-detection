@@ -18,6 +18,6 @@ We use 4-fold Cross-Validation technique for evaluation, as shown below.
 * Additionaly, we provide a summary graph of train and validation phases:
 ![image](https://user-images.githubusercontent.com/55198967/125077868-47f22800-e0ca-11eb-86ed-0f2d7d8fdfc2.png)
 
-* Finnaly, a time-series of the Confusion Matrices will help us understand the success on the test sample:
+* Finally, a time-series of the Confusion Matrices will help us understand the success on the test sample:
 ![image](https://user-images.githubusercontent.com/55198967/125077762-2133f180-e0ca-11eb-805a-fc9b2ae24907.png)
 
