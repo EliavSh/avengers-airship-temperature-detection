@@ -1,6 +1,6 @@
 # avengers-airship-temperature-detection
 
-This project deals with classification problem of three objects.
+This project deals with classification problem of three classes.
 For solving the problem we are going to use the keras pre-trained models.
 
 ## Example - pre-trained MobileNet
